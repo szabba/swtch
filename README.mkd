@@ -1,0 +1,29 @@
+# A simple RPi blinker
+
+[![Gobuild Download](http://gobuild.io/badge/github.com/szabba/blinky/downloads.svg)](http://gobuild.io/github.com/szabba/blinky)
+
+![](blink.gif)
+
+`blinky` can blink a LED. Connect the diode to the ground and a GPIO that you
+wish to supply the current on. We'll call this GPIO the output.
+
+Next connect another GPIO (the input) to a 3.3V current supply with a jumper
+wire or switch -- anything with which you can easily cut the current out.
+
+Next, launch blinky:
+
+```
+$ sudo blinky -in $INPUT -out $OUTPUT
+```
+
+^C will kill blinky safely. Blinky cleans up after itself.
+
+When you cut the current to the input, blinky will cut the current on output --
+turning the LED off.
+
+You can look up pin numbers
+[online](http://pi.gadgetoid.com/pinout/pin2_5v_power). Use the numbers left of
+the pin names (others might be supported, but I think they're most convenient).
+
+You can ommit both the `-in` and `-out` options. They default to 7 and 8
+respectively.
