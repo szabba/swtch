@@ -1,12 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi"
 )
+
+var in string
+
+func init() {
+	flag.StringVar(&in, "in", "8", "GPIO to read the switch state from")
+}
 
 func main() {
 	fmt.Printf("Blinker\n")
@@ -17,7 +24,7 @@ func main() {
 	}
 	defer embd.CloseGPIO()
 
-	swtch, err := NewSwitch("8", "7")
+	swtch, err := NewSwitch(in, "7")
 	if err != nil {
 		log.Fatal(err)
 	}
