@@ -63,6 +63,8 @@ type OutPin interface {
 // on quit.
 func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
 
+	defer out.Write(0)
+
 Out:
 	for {
 		val, err := in.Read()
@@ -70,8 +72,9 @@ Out:
 			log.Fatal(err)
 		}
 
-		if val == 0 {
-			break
+		err = out.Write(val)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		select {
