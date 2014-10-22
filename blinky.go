@@ -46,7 +46,7 @@ func main() {
 	out.SetDirection(embd.Out)
 	out.Write(0)
 
-	Loop(in, quit)
+	Loop(in, out, quit)
 }
 
 // InPin only contains the Read method of embd.DigitalPin
@@ -61,16 +61,16 @@ type OutPin interface {
 
 // Read from in until the value read is 0, an error occurs or something is sent
 // on quit.
-func Loop(in embd.DigitalPin, quit <-chan os.Signal) {
+func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
 
 Out:
 	for {
 		val, err := in.Read()
-
 		if err != nil {
 			log.Fatal(err)
+		}
 
-		} else if val == 0 {
+		if val == 0 {
 			break
 		}
 
