@@ -67,7 +67,7 @@ Out:
 
 // Create a channel that receives notifications on os.Interrupt and os.Kill
 func quitSignal() chan os.Signal {
-	out := make(chan struct{})
+	out := make(chan os.Signal, 1)
 	signal.Notify(out, os.Interrupt, os.Kill)
 	return out
 }
