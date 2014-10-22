@@ -11,10 +11,10 @@ import (
 	_ "github.com/kidoman/embd/host/rpi"
 )
 
-var in string
+var inKey string
 
 func init() {
-	flag.StringVar(&in, "in", "8", "GPIO to read the switch state from")
+	flag.StringVar(&inKey, "in", "8", "GPIO to read the switch state from")
 
 	flag.Parse()
 }
@@ -31,7 +31,7 @@ func main() {
 	}
 	defer embd.CloseGPIO()
 
-	swtch, err := NewSwitch(in)
+	swtch, err := NewSwitch(inKey)
 	if err != nil {
 		log.Fatal(err)
 	}
