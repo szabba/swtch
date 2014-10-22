@@ -17,7 +17,7 @@ func main() {
 	}
 	defer embd.CloseGPIO()
 
-	swtch, err := NewSwitch(8, 7)
+	swtch, err := NewSwitch("8", "7")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,9 +49,9 @@ type Switch struct {
 	In, Out embd.DigitalPin
 }
 
-// Create a new Switch. In is the number of the switch to read from and out the
+// Create a new Switch. In is the key of the switch to read from and out the
 // one to write to.
-func NewSwitch(in, out int) (s *Switch, err error) {
+func NewSwitch(in, out string) (s *Switch, err error) {
 	s = new(Switch)
 
 	s.In, err = embd.NewDigitalPin(in)
