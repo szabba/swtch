@@ -49,6 +49,16 @@ func main() {
 	Loop(in, quit)
 }
 
+// InPin only contains the Read method of embd.DigitalPin
+type InPin interface {
+	Read() (int, error)
+}
+
+// OutPin only contains the Write method of embd.DigitalPin
+type OutPin interface {
+	Write(int) error
+}
+
 // Read from in until the value read is 0, an error occurs or something is sent
 // on quit.
 func Loop(in embd.DigitalPin, quit <-chan os.Signal) {
