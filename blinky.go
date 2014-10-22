@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi"
@@ -20,6 +22,9 @@ func init() {
 func main() {
 	fmt.Printf("Blinker\n")
 
+	quit := quitSignal()
+	defer signal.Stop(quit)
+
 	err := embd.InitGPIO()
 	if err != nil {
 		log.Fatal(err)
@@ -32,13 +37,14 @@ func main() {
 	}
 	defer swtch.Close()
 
-	readLoop(swtch.in)
+	Loop(swtch.in, quit)
 }
 
-// Read from in until the value read is 0 or an error occurs.
-func readLoop(in embd.DigitalPin) {
-	in.SetDirection(embd.In)
+// Read from in until the value read is 0, an error occurs or something is sent
+// on quit.
+func Loop(in embd.DigitalPin, quit <-chan os.Signal) {
 
+Out:
 	for {
 		val, err := in.Read()
 
@@ -50,7 +56,20 @@ func readLoop(in embd.DigitalPin) {
 		}
 
 		fmt.Printf("Read %d from pin %d\n", val, in.N())
+
+		select {
+		case <-quit:
+			break Out
+		default:
+		}
 	}
+}
+
+// Create a channel that receives notifications on os.Interrupt and os.Kill
+func quitSignal() chan os.Signal {
+	out := make(chan struct{})
+	signal.Notify(out, os.Interrupt, os.Kill)
+	return out
 }
 
 // A Switch can be used to read when
