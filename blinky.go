@@ -13,6 +13,8 @@ var in string
 
 func init() {
 	flag.StringVar(&in, "in", "8", "GPIO to read the switch state from")
+
+	flag.Parse()
 }
 
 func main() {
