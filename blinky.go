@@ -31,13 +31,13 @@ func main() {
 	}
 	defer embd.CloseGPIO()
 
-	swtch, err := NewSwitch(inKey)
+	in, err := embd.NewDigitalPin(inKey)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer swtch.Close()
+	defer in.Close()
 
-	Loop(swtch.in, quit)
+	Loop(in, quit)
 }
 
 // Read from in until the value read is 0, an error occurs or something is sent
@@ -70,42 +70,4 @@ func quitSignal() chan os.Signal {
 	out := make(chan os.Signal, 1)
 	signal.Notify(out, os.Interrupt, os.Kill)
 	return out
-}
-
-// A Switch can be used to read when
-type Switch struct {
-	in embd.DigitalPin
-}
-
-// Create a new Switch. In is the key of the switch to read from and out the
-// one to write to.
-func NewSwitch(in string) (s *Switch, err error) {
-	s = new(Switch)
-
-	s.in, err = embd.NewDigitalPin(in)
-	if err != nil {
-		goto Error
-	}
-
-	err = s.in.SetDirection(embd.In)
-	if err != nil {
-		goto Error
-	}
-
-	return s, nil
-Error:
-	s.Close()
-	return nil, err
-}
-
-// Free associated resources
-func (s Switch) Close() error {
-
-	var err error
-
-	if s.in != nil {
-		s.in.Close()
-	}
-
-	return err
 }
