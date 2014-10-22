@@ -74,8 +74,6 @@ Out:
 			break
 		}
 
-		fmt.Printf("Read %d from pin %d\n", val, in.N())
-
 		select {
 		case <-quit:
 			break Out
