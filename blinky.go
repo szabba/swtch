@@ -30,7 +30,7 @@ func main() {
 	}
 	defer swtch.Close()
 
-	readLoop(swtch.In)
+	readLoop(swtch.in)
 }
 
 // Read from in until the value read is 0 or an error occurs.
@@ -53,7 +53,7 @@ func readLoop(in embd.DigitalPin) {
 
 // A Switch can be used to read when
 type Switch struct {
-	In embd.DigitalPin
+	in embd.DigitalPin
 }
 
 // Create a new Switch. In is the key of the switch to read from and out the
@@ -61,12 +61,12 @@ type Switch struct {
 func NewSwitch(in string) (s *Switch, err error) {
 	s = new(Switch)
 
-	s.In, err = embd.NewDigitalPin(in)
+	s.in, err = embd.NewDigitalPin(in)
 	if err != nil {
 		goto Error
 	}
 
-	err = s.In.SetDirection(embd.In)
+	err = s.in.SetDirection(embd.In)
 	if err != nil {
 		goto Error
 	}
@@ -82,8 +82,8 @@ func (s Switch) Close() error {
 
 	var err error
 
-	if s.In != nil {
-		s.In.Close()
+	if s.in != nil {
+		s.in.Close()
 	}
 
 	return err
