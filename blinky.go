@@ -24,7 +24,7 @@ func main() {
 	}
 	defer embd.CloseGPIO()
 
-	swtch, err := NewSwitch(in, "7")
+	swtch, err := NewSwitch(in)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,12 +53,12 @@ func readLoop(in embd.DigitalPin) {
 
 // A Switch can be used to read when
 type Switch struct {
-	In, Out embd.DigitalPin
+	In embd.DigitalPin
 }
 
 // Create a new Switch. In is the key of the switch to read from and out the
 // one to write to.
-func NewSwitch(in, out string) (s *Switch, err error) {
+func NewSwitch(in string) (s *Switch, err error) {
 	s = new(Switch)
 
 	s.In, err = embd.NewDigitalPin(in)
@@ -67,21 +67,6 @@ func NewSwitch(in, out string) (s *Switch, err error) {
 	}
 
 	err = s.In.SetDirection(embd.In)
-	if err != nil {
-		goto Error
-	}
-
-	s.Out, err = embd.NewDigitalPin(out)
-	if err != nil {
-		goto Error
-	}
-
-	err = s.Out.SetDirection(embd.Out)
-	if err != nil {
-		goto Error
-	}
-
-	err = s.Out.Write(1)
 	if err != nil {
 		goto Error
 	}
@@ -99,11 +84,6 @@ func (s Switch) Close() error {
 
 	if s.In != nil {
 		s.In.Close()
-	}
-
-	if s.Out != nil {
-		err = s.Out.Write(0)
-		s.Out.Close()
 	}
 
 	return err
