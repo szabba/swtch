@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/kidoman/embd"
 	_ "github.com/kidoman/embd/host/rpi"
@@ -59,9 +60,16 @@ type OutPin interface {
 	Write(int) error
 }
 
-// Read from in until the value read is 0, an error occurs or something is sent
-// on quit.
+const noise = 99
+
+// Writes from in to out until something is received on quit.
+//
+// A zero read from in is written immediately. A one is written only after it
+// repeats 1+noise times with roughly millisecond intervals between the reads.
+// This allows us to ignore temporary current fluctuations of the environment.
 func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
+
+	var nZs int
 
 	defer out.Write(0)
 
@@ -70,11 +78,21 @@ Out:
 		val, err := in.Read()
 		if err != nil {
 			log.Fatal(err)
+
+		} else if val != 0 {
+			nZs++
+		} else {
+			nZs = 0
 		}
 
-		err = out.Write(val)
-		if err != nil {
-			log.Fatal(err)
+		zero := val == 0
+		nonZeroNotNoise := nZs == 1+noise && !zero
+
+		if zero || nonZeroNotNoise {
+			err = out.Write(val)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		select {
@@ -82,6 +100,8 @@ Out:
 			break Out
 		default:
 		}
+
+		time.Sleep(time.Millisecond)
 	}
 }
 
