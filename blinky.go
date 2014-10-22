@@ -11,10 +11,11 @@ import (
 	_ "github.com/kidoman/embd/host/rpi"
 )
 
-var inKey string
+var inKey, outKey string
 
 func init() {
-	flag.StringVar(&inKey, "in", "8", "GPIO to read the switch state from")
+	flag.StringVar(&inKey, "in", "7", "GPIO to read the switch state from")
+	flag.StringVar(&outKey, "out", "8", "GPIO to supply current to the LED on")
 
 	flag.Parse()
 }
@@ -36,6 +37,14 @@ func main() {
 		log.Fatal(err)
 	}
 	defer in.Close()
+
+	out, err := embd.NewDigitalPin(outKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+	out.SetDirection(embd.Out)
+	out.Write(0)
 
 	Loop(in, quit)
 }
