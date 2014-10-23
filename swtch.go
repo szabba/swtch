@@ -80,8 +80,9 @@ type OutPin interface {
 // environment.
 func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
 
-	var nonZeros int
+	var lastSent, nonZeros int
 
+	out.Write(0)
 	defer out.Write(0)
 
 Out:
@@ -96,14 +97,16 @@ Out:
 			nonZeros = 0
 		}
 
-		zero := val == 0
-		nonZeroNotNoise := nonZeros == 1+noiseThreshold && !zero
+		zeroNotNoise := val == 0 && lastSent != 0
+		nonZeroNotNoise := val != 0 && nonZeros == 1+noiseThreshold
 
-		if zero || nonZeroNotNoise {
+		if zeroNotNoise || nonZeroNotNoise {
 			err = out.Write(val)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			lastSent = val
 		}
 
 		select {
