@@ -57,7 +57,6 @@ func main() {
 	}
 	defer out.Close()
 	out.SetDirection(embd.Out)
-	out.Write(0)
 
 	Loop(in, out, quit)
 }
