@@ -1,14 +1,18 @@
-# A simple RPi blinker
+# A simple RPi switch reader
 
-[![Gobuild Download](http://gobuild.io/badge/github.com/szabba/blinky/downloads.svg)](http://gobuild.io/github.com/szabba/blinky)
+[![Gobuild Download](http://gobuild.io/badge/github.com/szabba/swtch/downloads.svg)](http://gobuild.io/github.com/szabba/swtch)
 
 ![](blink.gif)
 
-`blinky` can blink a LED. Connect the diode to the ground and a GPIO that you
-wish to supply the current on. We'll call this GPIO the output.
+`swtch` can read the state of one GPIO and write it onto another one. Hence,
+with `swtch`, you can use the whole RPi as a switch, only using just jumper
+wires besides it.
+
+Connect a LED diode to the ground and a GPIO that you wish to supply the
+current on. We'll call this GPIO the output.
 
 Next connect another GPIO (the input) to a 3.3V current supply with a jumper
-wire or switch -- anything with which you can easily cut the current out.
+wire or DIP switch -- anything with which you can easily cut the current out.
 
 Next, launch blinky:
 
