@@ -50,7 +50,9 @@ func main() {
 	defer out.Close()
 	out.SetDirection(embd.Out)
 
-	Loop(in, out, quit)
+	conn := make(chan int)
+	go InLoop(in, conn, quit)
+	OutLoop(out, conn, quit)
 }
 
 // InPin only contains the Read method of embd.DigitalPin
@@ -63,18 +65,12 @@ type OutPin interface {
 	Write(int) error
 }
 
-// Writes from in to out until something is received on quit.
-//
-// When the input value changes. A one is written only after it
-// repeats 1+noiseThreshold times with roughly millisecond intervals between
-// the reads.  This allows us to ignore temporary current fluctuations of the
-// environment.
-func Loop(in InPin, out OutPin, quit <-chan struct{}) {
+func InLoop(in InPin, out chan<- int, quit <-chan struct{}) {
 
 	var lastSent int
 
-	out.Write(0)
-	defer out.Write(0)
+	out <- 0
+	defer close(out)
 
 Out:
 	for {
@@ -87,16 +83,13 @@ Out:
 		nonZeroNotNoise := val != 0 && lastSent == 0
 
 		if zeroNotNoise || nonZeroNotNoise {
-			err = out.Write(val)
-			if err != nil {
-				log.Fatal(err)
-			}
-
+			out <- val
 			lastSent = val
 		}
 
 		select {
 		case <-quit:
+
 			break Out
 		default:
 		}
@@ -105,6 +98,16 @@ Out:
 	}
 }
 
+func OutLoop(out OutPin, in <-chan int, quit chan struct{}) {
+	defer out.Write(0)
+
+	for v := range in {
+		err := out.Write(v)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 
 // Sends n events on channel once os.Kill or os.Interrupt is received
 func QuitSignal(n int) chan struct{} {
