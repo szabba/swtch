@@ -99,12 +99,35 @@ Out:
 }
 
 func OutLoop(out OutPin, in <-chan int, quit chan struct{}) {
-	defer out.Write(0)
+	var blink, on bool
+	defer out.Write(embd.Low)
 
-	for v := range in {
-		err := out.Write(v)
-		if err != nil {
-			log.Fatal(err)
+Out:
+	for {
+		select {
+		case v, open := <-in:
+
+			if !open {
+				break Out
+			}
+			blink = v != 0
+			if blink {
+				on = true
+			} else {
+				on = false
+				out.Write(embd.Low)
+			}
+
+		case <-time.After(100 * time.Millisecond):
+
+			if blink {
+				if on {
+					out.Write(embd.High)
+				} else {
+					out.Write(embd.Low)
+				}
+				on = !on
+			}
 		}
 	}
 }
