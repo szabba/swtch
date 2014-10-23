@@ -52,7 +52,7 @@ func main() {
 
 	conn := make(chan int)
 	go InLoop(in, conn, quit)
-	OutLoop(out, conn, quit)
+	OutLoop(out, conn)
 }
 
 // InPin only contains the Read method of embd.DigitalPin
@@ -98,7 +98,7 @@ Out:
 	}
 }
 
-func OutLoop(out OutPin, in <-chan int, quit chan struct{}) {
+func OutLoop(out OutPin, in <-chan int) {
 	var blink, on bool
 	defer out.Write(embd.Low)
 
