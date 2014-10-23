@@ -14,15 +14,15 @@ current on. We'll call this GPIO the output.
 Next connect another GPIO (the input) to a 3.3V current supply with a jumper
 wire or DIP switch -- anything with which you can easily cut the current out.
 
-Next, launch blinky:
+Next, launch swtch:
 
 ```
-$ sudo blinky -in $INPUT -out $OUTPUT
+$ sudo swtch -in $INPUT -out $OUTPUT
 ```
 
-^C will kill blinky safely. Blinky cleans up after itself.
+^C will kill swtch safely. Blinky cleans up after itself.
 
-When you cut the current to the input, blinky will cut the current on output --
+When you cut the current to the input, swtch will cut the current on output --
 turning the LED off.
 
 You can look up pin numbers
