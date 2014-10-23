@@ -29,8 +29,7 @@ func init() {
 func main() {
 	fmt.Printf("Blinker\n")
 
-	quit := quitSignal()
-	defer signal.Stop(quit)
+	quit := QuitSignal(1)
 
 	err := embd.InitGPIO()
 	if err != nil {
@@ -70,7 +69,7 @@ type OutPin interface {
 // repeats 1+noiseThreshold times with roughly millisecond intervals between
 // the reads.  This allows us to ignore temporary current fluctuations of the
 // environment.
-func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
+func Loop(in InPin, out OutPin, quit <-chan struct{}) {
 
 	var lastSent int
 
@@ -106,9 +105,23 @@ Out:
 	}
 }
 
-// Create a channel that receives notifications on os.Interrupt and os.Kill
-func quitSignal() chan os.Signal {
-	out := make(chan os.Signal, 1)
-	signal.Notify(out, os.Interrupt, os.Kill)
-	return out
+
+// Sends n events on channel once os.Kill or os.Interrupt is received
+func QuitSignal(n int) chan struct{} {
+	var (
+		sig  = make(chan os.Signal, 1)
+		quit = make(chan struct{})
+	)
+	signal.Notify(sig, os.Interrupt, os.Kill)
+
+	go func() {
+		defer signal.Stop(sig)
+
+		<-sig
+		for i := 0; i < n; i++ {
+			quit <- struct{}{}
+		}
+	}()
+
+	return quit
 }
