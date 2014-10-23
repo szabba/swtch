@@ -13,20 +13,13 @@ import (
 )
 
 var (
-	inKey, outKey  string
-	noiseThreshold int
-	sleepTime      Duration = Duration(time.Millisecond)
+	inKey, outKey string
+	sleepTime     Duration = Duration(time.Millisecond)
 )
 
 func init() {
 	flag.StringVar(&inKey, "in", "7", "GPIO to read the switch state from")
 	flag.StringVar(&outKey, "out", "8", "GPIO to supply current to the LED on")
-
-	flag.IntVar(
-		&noiseThreshold, "noise", 99,
-		"number of times a 1 must be read before it's considered more than a "+
-			"fluctuation",
-	)
 
 	flag.Var(&sleepTime, "sleep", "duration to wait between input reads")
 
@@ -73,13 +66,13 @@ type OutPin interface {
 
 // Writes from in to out until something is received on quit.
 //
-// A zero read from in is written immediately. A one is written only after it
+// When the input value changes. A one is written only after it
 // repeats 1+noiseThreshold times with roughly millisecond intervals between
 // the reads.  This allows us to ignore temporary current fluctuations of the
 // environment.
 func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
 
-	var lastSent, nonZeros int
+	var lastSent int
 
 	out.Write(0)
 	defer out.Write(0)
@@ -89,15 +82,10 @@ Out:
 		val, err := in.Read()
 		if err != nil {
 			log.Fatal(err)
-
-		} else if val != 0 {
-			nonZeros++
-		} else {
-			nonZeros = 0
 		}
 
 		zeroNotNoise := val == 0 && lastSent != 0
-		nonZeroNotNoise := val != 0 && nonZeros == 1+noiseThreshold
+		nonZeroNotNoise := val != 0 && lastSent == 0
 
 		if zeroNotNoise || nonZeroNotNoise {
 			err = out.Write(val)
