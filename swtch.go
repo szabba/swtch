@@ -13,12 +13,15 @@ import (
 
 var (
 	inKey, outKey string
+	freq          int
 	sleepTime     Duration = Duration(time.Millisecond)
 )
 
 func init() {
 	flag.StringVar(&inKey, "in", "7", "GPIO to read the switch state from")
 	flag.StringVar(&outKey, "out", "8", "GPIO to supply current to the LED on")
+
+	flag.IntVar(&freq, "freq", 5, "output blink frequency (in Hz)")
 
 	flag.Var(&sleepTime, "sleep", "duration to wait between input reads")
 
@@ -115,7 +118,7 @@ Out:
 				out.Write(embd.Low)
 			}
 
-		case <-time.After(100 * time.Millisecond):
+		case <-time.After(time.Second / time.Duration(freq)):
 
 			if blink {
 				if on {
