@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -27,8 +26,6 @@ func init() {
 }
 
 func main() {
-	fmt.Printf("Blinker\n")
-
 	quit := QuitSignal(1)
 
 	err := embd.InitGPIO()
