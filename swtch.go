@@ -12,11 +12,20 @@ import (
 	_ "github.com/kidoman/embd/host/rpi"
 )
 
-var inKey, outKey string
+var (
+	inKey, outKey  string
+	noiseThreshold int
+)
 
 func init() {
 	flag.StringVar(&inKey, "in", "7", "GPIO to read the switch state from")
 	flag.StringVar(&outKey, "out", "8", "GPIO to supply current to the LED on")
+
+	flag.IntVar(
+		&noiseThreshold, "noise", 99,
+		"number of times a 1 must be read before it's considered more than a "+
+			"fluctuation",
+	)
 
 	flag.Parse()
 }
@@ -60,13 +69,12 @@ type OutPin interface {
 	Write(int) error
 }
 
-const noise = 99
-
 // Writes from in to out until something is received on quit.
 //
 // A zero read from in is written immediately. A one is written only after it
-// repeats 1+noise times with roughly millisecond intervals between the reads.
-// This allows us to ignore temporary current fluctuations of the environment.
+// repeats 1+noiseThreshold times with roughly millisecond intervals between
+// the reads.  This allows us to ignore temporary current fluctuations of the
+// environment.
 func Loop(in InPin, out OutPin, quit <-chan os.Signal) {
 
 	var nZs int
@@ -86,7 +94,7 @@ Out:
 		}
 
 		zero := val == 0
-		nonZeroNotNoise := nZs == 1+noise && !zero
+		nonZeroNotNoise := nZs == 1+noiseThreshold && !zero
 
 		if zero || nonZeroNotNoise {
 			err = out.Write(val)
