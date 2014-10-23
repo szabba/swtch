@@ -15,6 +15,7 @@ import (
 var (
 	inKey, outKey  string
 	noiseThreshold int
+	sleepTime      Duration = Duration(time.Millisecond)
 )
 
 func init() {
@@ -26,6 +27,8 @@ func init() {
 		"number of times a 1 must be read before it's considered more than a "+
 			"fluctuation",
 	)
+
+	flag.Var(&sleepTime, "sleep", "duration to wait between input reads")
 
 	flag.Parse()
 }
@@ -109,7 +112,7 @@ Out:
 		default:
 		}
 
-		time.Sleep(time.Millisecond)
+		sleepTime.Sleep()
 	}
 }
 
